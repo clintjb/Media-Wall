@@ -1,0 +1,627 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Media Wall</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    background: #08090b;
+    color: white;
+
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+
+.wall {
+    position: relative;
+
+    width: 100%;
+    height: 100vh;
+
+    overflow: hidden;
+}
+
+/*
+ * ------------------------------------------------------------
+ * Photos
+ * ------------------------------------------------------------
+ */
+
+.photo-stage {
+    position: absolute;
+    inset: 0;
+
+    opacity: 0;
+
+    transition:
+        opacity 2s ease;
+
+    background: #08090b;
+}
+
+.photo-stage.active {
+    opacity: 1;
+}
+
+.photo-stage img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+/*
+ * Subtle cinematic overlay.
+ */
+
+.photo-stage::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.05),
+            rgba(0, 0, 0, 0.40)
+        );
+}
+
+/*
+ * ------------------------------------------------------------
+ * Movies
+ * ------------------------------------------------------------
+ */
+
+.movie-stage {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    padding: 3vw;
+
+    background:
+        radial-gradient(
+            circle at center,
+            #202329 0%,
+            #08090b 70%
+        );
+
+    opacity: 0;
+
+    transition:
+        opacity 1.5s ease;
+}
+
+.movie-stage.active {
+    opacity: 1;
+}
+
+.movie-title {
+    margin: 0 0 1.5rem;
+
+    font-size:
+        clamp(1.2rem, 2vw, 2rem);
+
+    font-weight: 600;
+
+    letter-spacing: 0.04em;
+
+    text-transform: uppercase;
+
+    opacity: 0.85;
+}
+
+.movies {
+    display: grid;
+
+    grid-template-columns:
+        repeat(10, minmax(0, 1fr));
+
+    gap: 1vw;
+}
+
+.movie {
+    position: relative;
+
+    aspect-ratio: 2 / 3;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: #15171b;
+
+    box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.35);
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.movie:hover {
+    transform:
+        translateY(-6px)
+        scale(1.025);
+
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.5);
+}
+
+.movie img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+}
+
+.movie-info {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    padding:
+        3rem
+        0.65rem
+        0.65rem;
+
+    background:
+        linear-gradient(
+            transparent,
+            rgba(0, 0, 0, 0.9)
+        );
+}
+
+.movie-name {
+    font-size:
+        clamp(0.65rem, 0.8vw, 0.9rem);
+
+    font-weight: 600;
+
+    line-height: 1.2;
+}
+
+.movie-year {
+    margin-top: 0.25rem;
+
+    font-size: 0.7rem;
+
+    opacity: 0.65;
+}
+
+/*
+ * ------------------------------------------------------------
+ * Loading
+ * ------------------------------------------------------------
+ */
+
+.message {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #888;
+}
+
+.hidden {
+    display: none;
+}
+
+/*
+ * ------------------------------------------------------------
+ * Responsive
+ * ------------------------------------------------------------
+ */
+
+@media (max-width: 1200px) {
+
+    .movies {
+        grid-template-columns:
+            repeat(5, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+
+    .movies {
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+    }
+
+    .movie:nth-child(n + 7) {
+        display: none;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wall">
+
+    <div
+        id="photoStage"
+        class="photo-stage"
+    ></div>
+
+    <div
+        id="movieStage"
+        class="movie-stage"
+    >
+
+        <h1 class="movie-title">
+            Latest Movies
+        </h1>
+
+        <div
+            id="movies"
+            class="movies"
+        ></div>
+
+    </div>
+
+    <div
+        id="message"
+        class="message"
+    >
+        Loading media...
+    </div>
+
+</div>
+
+<script>
+
+let photos = [];
+let movies = [];
+
+let photoIndex = 0;
+
+let mode = "photos";
+
+/*
+ * ------------------------------------------------------------
+ * Photos
+ * ------------------------------------------------------------
+ */
+
+async function loadPhotos() {
+
+    try {
+
+        const response =
+            await fetch("/api/photos");
+
+        const data =
+            await response.json();
+
+        photos =
+            data.photos || [];
+
+        console.log(
+            "Loaded photos:",
+            photos.length
+        );
+
+        if (photos.length > 0) {
+            showPhoto(0);
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load photos:",
+            error
+        );
+    }
+}
+
+/*
+ * ------------------------------------------------------------
+ * Movies
+ * ------------------------------------------------------------
+ */
+
+async function loadMovies() {
+
+    try {
+
+        const response =
+            await fetch("/api/movies");
+
+        const data =
+            await response.json();
+
+        movies =
+            data.movies || [];
+
+        console.log(
+            "Loaded movies:",
+            movies.length
+        );
+
+        renderMovies();
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load movies:",
+            error
+        );
+    }
+}
+
+/*
+ * ------------------------------------------------------------
+ * Display photo
+ * ------------------------------------------------------------
+ */
+
+function showPhoto(index) {
+
+    if (!photos.length) {
+        return;
+    }
+
+    photoIndex =
+        index % photos.length;
+
+    const stage =
+        document.getElementById(
+            "photoStage"
+        );
+
+    stage.innerHTML = "";
+
+    const image =
+        document.createElement("img");
+
+    image.src =
+        "/photos/" +
+        photos[photoIndex];
+
+    image.loading = "eager";
+
+    stage.appendChild(image);
+}
+
+/*
+ * ------------------------------------------------------------
+ * Display movies
+ * ------------------------------------------------------------
+ */
+
+function renderMovies() {
+
+    const container =
+        document.getElementById(
+            "movies"
+        );
+
+    container.innerHTML = "";
+
+    movies.forEach(movie => {
+
+        const card =
+            document.createElement("div");
+
+        card.className = "movie";
+
+        const image =
+            document.createElement("img");
+
+        image.src =
+            movie.image;
+
+        image.alt =
+            movie.name;
+
+        image.loading =
+            "lazy";
+
+        const info =
+            document.createElement("div");
+
+        info.className =
+            "movie-info";
+
+        const name =
+            document.createElement("div");
+
+        name.className =
+            "movie-name";
+
+        name.textContent =
+            movie.name;
+
+        info.appendChild(name);
+
+        if (movie.year) {
+
+            const year =
+                document.createElement("div");
+
+            year.className =
+                "movie-year";
+
+            year.textContent =
+                movie.year;
+
+            info.appendChild(year);
+        }
+
+        card.appendChild(image);
+        card.appendChild(info);
+
+        container.appendChild(card);
+
+    });
+}
+
+/*
+ * ------------------------------------------------------------
+ * Modes
+ * ------------------------------------------------------------
+ */
+
+function showPhotoMode() {
+
+    if (!photos.length) {
+
+        if (movies.length) {
+            showMovieMode();
+        }
+
+        return;
+    }
+
+    mode = "photos";
+
+    document
+        .getElementById("photoStage")
+        .classList.add("active");
+
+    document
+        .getElementById("movieStage")
+        .classList.remove("active");
+
+    document
+        .getElementById("message")
+        .classList.add("hidden");
+}
+
+function showMovieMode() {
+
+    if (!movies.length) {
+        return;
+    }
+
+    mode = "movies";
+
+    document
+        .getElementById("photoStage")
+        .classList.remove("active");
+
+    document
+        .getElementById("movieStage")
+        .classList.add("active");
+
+    document
+        .getElementById("message")
+        .classList.add("hidden");
+}
+
+/*
+ * ------------------------------------------------------------
+ * Photo rotation
+ *
+ * One photo every 8 seconds.
+ * ------------------------------------------------------------
+ */
+
+setInterval(() => {
+
+    if (mode !== "photos") {
+        return;
+    }
+
+    photoIndex++;
+
+    showPhoto(photoIndex);
+
+}, 8000);
+
+/*
+ * ------------------------------------------------------------
+ * Switch between photos and movies.
+ *
+ * 40 seconds photos
+ * 12 seconds movies
+ * ------------------------------------------------------------
+ */
+
+setInterval(() => {
+
+    if (mode === "photos") {
+
+        showMovieMode();
+
+        setTimeout(
+            showPhotoMode,
+            12000
+        );
+    }
+
+}, 40000);
+
+/*
+ * ------------------------------------------------------------
+ * Refresh Jellyfin every 10 minutes.
+ * ------------------------------------------------------------
+ */
+
+setInterval(
+    loadMovies,
+    10 * 60 * 1000
+);
+
+/*
+ * ------------------------------------------------------------
+ * Start
+ * ------------------------------------------------------------
+ */
+
+Promise.all([
+    loadPhotos(),
+    loadMovies()
+
+]).then(() => {
+
+    if (photos.length) {
+
+        showPhotoMode();
+
+    } else if (movies.length) {
+
+        showMovieMode();
+    }
+
+});
+
+</script>
+
+</body>
+</html>
+```
