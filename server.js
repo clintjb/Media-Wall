@@ -112,7 +112,7 @@ async function jellyfinRequest(endpoint) {
         `${JELLYFIN_URL}${endpoint}`,
         {
             headers: {
-                "X-Emby-Token": JELLYFIN_API_KEY,
+                "Authorization": `MediaBrowser Token="${JELLYFIN_API_KEY}"`,
                 "Accept": "application/json"
             }
         }
@@ -175,7 +175,7 @@ app.get("/jellyfin-image/:id", async (req, res) => {
             `${JELLYFIN_URL}/Items/${req.params.id}/Images/Primary`,
             {
                 headers: {
-                    "X-Emby-Token": JELLYFIN_API_KEY
+                    "Authorization": `MediaBrowser Token="${JELLYFIN_API_KEY}"`
                 }
             }
         );
