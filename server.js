@@ -6,7 +6,7 @@ const path = require("path");
 const app = express();
 
 const PORT = 3000;
-const PHOTOS_DIR = "/photos";
+const PHOTOS_DIR = process.env.PHOTOS_DIR || "/photos";
 
 const JELLYFIN_URL = process.env.JELLYFIN_URL;
 const JELLYFIN_API_KEY = process.env.JELLYFIN_API_KEY;
