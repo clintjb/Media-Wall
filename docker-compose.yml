@@ -1,0 +1,22 @@
+services:
+  media-wall:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: homepage-media-wall:latest
+    container_name: homepage-media-wall
+
+    environment:
+      - TZ=Europe/Berlin
+      - JELLYFIN_URL=${JELLYFIN_URL}
+      - JELLYFIN_API_KEY=${JELLYFIN_API_KEY}
+      - PHOTOS_DIR=${PHOTOS_DIR}
+
+    volumes:
+      - ${PHOTOS_HOST_PATH}:${PHOTOS_DIR}:ro
+
+    ports:
+      - "${MEDIA_WALL_PORT}:3000"
+
+    restart: unless-stopped
