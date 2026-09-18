@@ -1,4 +1,4 @@
-```javascript
+javascript
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
@@ -214,5 +214,3 @@ app.listen(PORT, "0.0.0.0", () => {
         `Media Wall listening on port ${PORT}`
     );
 });
-```
-
