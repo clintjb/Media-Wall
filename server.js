@@ -15,6 +15,12 @@ if (!JELLYFIN_URL || !JELLYFIN_API_KEY) {
     process.exit(1);
 }
 
+console.log(
+    `JELLYFIN_API_KEY loaded: length=${JELLYFIN_API_KEY.length}, ` +
+    `starts="${JELLYFIN_API_KEY.slice(0, 3)}", ends="${JELLYFIN_API_KEY.slice(-3)}", ` +
+    `hasQuotes=${JELLYFIN_API_KEY.includes('"')}, hasWhitespace=${/\s/.test(JELLYFIN_API_KEY)}`
+);
+
 app.use(express.json());
 
 /*
