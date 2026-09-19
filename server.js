@@ -245,7 +245,7 @@ async function fetchJellyfinMovies() {
             movie.BackdropImageTags && movie.BackdropImageTags.length
                 ? `/api/image/jellyfin/${movie.Id}/backdrop`
                 : `/api/image/jellyfin/${movie.Id}/poster`,
-        status: "On this server"
+        status: "New On Birdflix"
     }));
 }
 
