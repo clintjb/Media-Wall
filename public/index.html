@@ -12,11 +12,11 @@
 <style>
 
 :root {
-    --marquee-black: #0c0a09;
-    --marquee-charcoal: #1a1613;
-    --marquee-cream: #f5efe6;
-    --marquee-brass: #c9a566;
-    --marquee-brass-dim: #8a7350;
+    --marquee-black: #12151f;
+    --marquee-charcoal: #1e2333;
+    --marquee-cream: #e8ecf5;
+    --marquee-brass: #6c8ebf;
+    --marquee-brass-dim: #4a5a78;
     --marquee-red: #7a2e2e;
 
     --font-display: "Fraunces", Georgia, serif;
@@ -332,55 +332,6 @@ body {
 
 /*
  * ------------------------------------------------------------
- * Progress rail — quiet indicator of where we are in the loop
- * ------------------------------------------------------------
- */
-
-.rail {
-    position: absolute;
-    right: 2.4rem;
-    bottom: 1.8rem;
-    z-index: 3;
-
-    display: flex;
-    gap: 0.4rem;
-}
-
-.rail .tick {
-    width: 14px;
-    height: 3px;
-    border-radius: 2px;
-    background: rgba(245, 239, 230, 0.25);
-    overflow: hidden;
-}
-
-.rail .tick.movie {
-    background: rgba(201, 165, 102, 0.35);
-}
-
-.rail .tick.current .fill {
-    display: block;
-    height: 100%;
-    width: 0%;
-    background: var(--marquee-cream);
-    animation: fill-tick linear forwards;
-}
-
-.rail .tick.movie.current .fill {
-    background: var(--marquee-brass);
-}
-
-.rail .tick .fill {
-    display: none;
-}
-
-@keyframes fill-tick {
-    from { width: 0%; }
-    to { width: 100%; }
-}
-
-/*
- * ------------------------------------------------------------
  * Responsive
  * ------------------------------------------------------------
  */
@@ -457,7 +408,6 @@ body {
         <span id="photoCaptionText">Photo Wall</span>
     </div>
 
-    <div class="rail hidden" id="rail"></div>
 
     <div id="message" class="message">Raising the curtain&hellip;</div>
 
@@ -660,38 +610,6 @@ function renderMovie() {
 
 /*
  * ------------------------------------------------------------
- * Progress rail
- * ------------------------------------------------------------
- */
-
-function renderRail() {
-    const rail = document.getElementById("rail");
-
-    if (sequence.length <= 1 || sequence.length > 40) {
-        rail.classList.add("hidden");
-        return;
-    }
-
-    rail.classList.remove("hidden");
-    rail.innerHTML = "";
-
-    sequence.forEach((kind, idx) => {
-        const tick = document.createElement("div");
-        tick.className = "tick " + kind;
-        if (idx === sequencePos) {
-            tick.classList.add("current");
-            const fill = document.createElement("div");
-            fill.className = "fill";
-            fill.style.animationDuration =
-                (kind === "movie" ? MOVIE_DURATION : PHOTO_DURATION) + "ms";
-            tick.appendChild(fill);
-        }
-        rail.appendChild(tick);
-    });
-}
-
-/*
- * ------------------------------------------------------------
  * Slide transitions
  * ------------------------------------------------------------
  */
@@ -726,7 +644,6 @@ function advance() {
     const kind = sequence[sequencePos];
 
     showSlide(kind);
-    renderRail();
 
     clearTimeout(currentTimer);
     currentTimer = setTimeout(

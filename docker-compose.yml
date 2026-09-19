@@ -32,6 +32,29 @@ services:
       - SEERR_URL=${SEERR_URL:-}
       - SEERR_API_KEY=${SEERR_API_KEY:-}
 
+      # --- Portainer container health (optional) ---------------
+      # Generate an API key in Portainer under
+      # User settings > Access tokens. ENDPOINT_ID is the
+      # environment/endpoint ID shown in Portainer's URL when you
+      # click into an environment (usually 1 for a single-node
+      # setup).
+      - PORTAINER_URL=${PORTAINER_URL:-}
+      - PORTAINER_API_KEY=${PORTAINER_API_KEY:-}
+      - PORTAINER_ENDPOINT_ID=${PORTAINER_ENDPOINT_ID:-1}
+
+      # --- cron-job.org job history (optional) ------------------
+      # Generate an API key at https://console.cron-job.org under
+      # Settings. Leave CRONJOB_JOB_ID blank to check the most
+      # recent runs across every job in the account, or set it to
+      # a specific job's ID to check only that job.
+      - CRONJOB_API_KEY=${CRONJOB_API_KEY:-}
+      - CRONJOB_JOB_ID=${CRONJOB_JOB_ID:-}
+      - CRONJOB_LOOKBACK=${CRONJOB_LOOKBACK:-5}
+
+      # --- Wifi points / router ping checks (optional) ----------
+      # Comma separated list of name=host pairs.
+      - WIFI_POINTS=${WIFI_POINTS:-}
+
     volumes:
       - ${PHOTOS_HOST_PATH}:${PHOTOS_DIR:-/photos}:ro
 

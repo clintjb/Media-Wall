@@ -1,6 +1,11 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const {
+    getPortainerStatus,
+    getCronjobStatus,
+    getWifiStatus
+} = require("./status");
 
 const app = express();
 
@@ -517,6 +522,65 @@ app.get("/api/movies", async (req, res) => {
 
 /*
  * ------------------------------------------------------------
+ * Status endpoints
+ *
+ * Each returns a small flat JSON object intended for Homepage's
+ * `customapi` widget. See README.md for matching services.yaml
+ * snippets.
+ * ------------------------------------------------------------
+ */
+
+app.get("/api/status/portainer", async (req, res) => {
+    try {
+        res.json(await getPortainerStatus());
+    } catch (error) {
+        console.error("Portainer status endpoint error:", error);
+        res.status(502).json({
+            enabled: true,
+            summary: "Error",
+            running: 0,
+            unhealthy: 0,
+            stopped: 0,
+            total: 0,
+            issues: "Internal error"
+        });
+    }
+});
+
+app.get("/api/status/cronjob", async (req, res) => {
+    try {
+        res.json(await getCronjobStatus());
+    } catch (error) {
+        console.error("cron-job.org status endpoint error:", error);
+        res.status(502).json({
+            enabled: true,
+            summary: "Error",
+            checked: 0,
+            failed: 0,
+            lastRun: "",
+            issues: "Internal error"
+        });
+    }
+});
+
+app.get("/api/status/wifi", async (req, res) => {
+    try {
+        res.json(await getWifiStatus());
+    } catch (error) {
+        console.error("Wifi status endpoint error:", error);
+        res.status(502).json({
+            enabled: true,
+            summary: "Error",
+            up: 0,
+            down: 0,
+            total: 0,
+            issues: "Internal error"
+        });
+    }
+});
+
+/*
+ * ------------------------------------------------------------
  * Image proxying
  *
  * Keeps Jellyfin API keys off the client and gives the frontend
@@ -570,4 +634,9 @@ app.listen(PORT, "0.0.0.0", () => {
     if (SEERR_ENABLED) {
         console.log(`Using Seerr base URL: ${SEERR_BASE_URL}`);
     }
+    console.log(
+        `Status checks - Portainer: ${require("./status").PORTAINER_ENABLED ? "enabled" : "disabled"}, ` +
+        `cron-job.org: ${require("./status").CRONJOB_ENABLED ? "enabled" : "disabled"}, ` +
+        `Wifi: ${require("./status").WIFI_ENABLED ? "enabled" : "disabled"}`
+    );
 });

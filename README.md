@@ -59,3 +59,164 @@ Jellyseerr/Overseerr.
   them through `/api/image/jellyfin/...`.
 - Seerr/TMDB poster and backdrop images are served directly from TMDB's
   CDN (no API key required for images).
+
+## Status checks (Portainer, cron-job.org, wifi points)
+
+This container also exposes three small JSON status endpoints, meant to be
+consumed by Homepage's `customapi` widget. Each is independent and
+optional — leave the related env vars blank to disable it (the endpoint
+will still respond, just with `enabled: false`).
+
+### Portainer container health
+
+Checks every container in a given Portainer environment and reports how
+many are running, unhealthy/restarting, or stopped.
+
+**Setup:**
+1. In Portainer, go to your user icon → **My account** → **Access tokens**
+   → **Add access token**. Copy the token — it's only shown once.
+2. Find your environment/endpoint ID: click into the environment in
+   Portainer and check the URL, e.g. `.../endpoints/1/docker/...` → `1`.
+3. Set in `.env`:
+   ```
+   PORTAINER_URL=http://192.168.178.169:9000
+   PORTAINER_API_KEY=ptr_xxxxxxxxxxxxxxxxxxxx
+   PORTAINER_ENDPOINT_ID=1
+   ```
+
+**Endpoint:** `GET /api/status/portainer`
+```json
+{
+  "enabled": true,
+  "summary": "All healthy",
+  "running": 14,
+  "unhealthy": 0,
+  "stopped": 1,
+  "total": 15,
+  "issues": "None"
+}
+```
+
+**services.yaml:**
+```yaml
+- Container Health:
+    icon: sh-docker.svg
+    widget:
+      type: customapi
+      url: http://192.168.178.169:8088/api/status/portainer
+      refreshInterval: 60000
+      mappings:
+        - field: summary
+          label: Status
+        - field: running
+          label: Running
+        - field: unhealthy
+          label: Unhealthy
+        - field: stopped
+          label: Stopped
+        - field: issues
+          label: Issues
+```
+
+### cron-job.org — last N runs
+
+Checks the most recent executions across every job in your cron-job.org
+account (or a single job, if you set `CRONJOB_JOB_ID`) and reports any
+failures among the last `CRONJOB_LOOKBACK` runs (default 5).
+
+**Setup:**
+1. Go to [console.cron-job.org](https://console.cron-job.org) → **Settings**
+   → generate an API key.
+2. Set in `.env`:
+   ```
+   CRONJOB_API_KEY=your-api-key-here
+   CRONJOB_JOB_ID=            # optional - leave blank to check all jobs
+   CRONJOB_LOOKBACK=5
+   ```
+
+**Endpoint:** `GET /api/status/cronjob`
+```json
+{
+  "enabled": true,
+  "summary": "All OK",
+  "checked": 5,
+  "failed": 0,
+  "lastRun": "2026-09-19T08:00:11.000Z",
+  "issues": "None"
+}
+```
+
+**services.yaml:**
+```yaml
+- Cron Jobs:
+    icon: mdi-clock-check-outline
+    widget:
+      type: customapi
+      url: http://192.168.178.169:8088/api/status/cronjob
+      refreshInterval: 60000
+      mappings:
+        - field: summary
+          label: Status
+        - field: checked
+          label: Checked
+        - field: failed
+          label: Failed
+        - field: lastRun
+          label: Last Run
+          format: relativeDate
+        - field: issues
+          label: Issues
+```
+
+Note: cron-job.org's free tier allows 100 API requests/day. Checking
+"all jobs" fetches the job list once plus one history call per job on
+every refresh, so keep `refreshInterval` generous (60000ms/1min shown
+above = 1,440 job-list calls/day alone if you have many jobs) — adjust
+upward, or set `CRONJOB_JOB_ID` to a single job, if you're near the
+limit.
+
+### Wifi points / router ping checks
+
+Pings a list of hosts (e.g. your access points) and reports how many are
+up or down.
+
+**Setup:** set in `.env` as a comma separated list of `name=host` pairs:
+```
+WIFI_POINTS=Lounge=192.168.178.112,Office=192.168.178.113,Attic=192.168.178.114,Pub=192.168.178.115
+```
+
+**Endpoint:** `GET /api/status/wifi`
+```json
+{
+  "enabled": true,
+  "summary": "All up",
+  "up": 4,
+  "down": 0,
+  "total": 4,
+  "issues": "None"
+}
+```
+
+**services.yaml:**
+```yaml
+- Wifi Points:
+    icon: sh-tp-link.svg
+    widget:
+      type: customapi
+      url: http://192.168.178.169:8088/api/status/wifi
+      refreshInterval: 30000
+      mappings:
+        - field: summary
+          label: Status
+        - field: up
+          label: Up
+        - field: down
+          label: Down
+        - field: issues
+          label: Issues
+```
+
+This gives you one card with an at-a-glance up/down count. If you still
+want the four individual APs shown with their own status dots (as
+covered earlier), keep those as separate `ping:`-based services — the
+two approaches aren't mutually exclusive.
