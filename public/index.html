@@ -1,13 +1,27 @@
-html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Media Wall</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
 <style>
+
+:root {
+    --marquee-black: #0c0a09;
+    --marquee-charcoal: #1a1613;
+    --marquee-cream: #f5efe6;
+    --marquee-brass: #c9a566;
+    --marquee-brass-dim: #8a7350;
+    --marquee-red: #7a2e2e;
+
+    --font-display: "Fraunces", Georgia, serif;
+    --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
 
 * {
     box-sizing: border-box;
@@ -21,218 +35,295 @@ body {
     height: 100%;
     overflow: hidden;
 
-    background: #08090b;
-    color: white;
+    background: var(--marquee-black);
+    color: var(--marquee-cream);
 
-    font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
+    font-family: var(--font-body);
 }
 
 .wall {
     position: relative;
-
     width: 100%;
     height: 100vh;
-
     overflow: hidden;
 }
 
 /*
  * ------------------------------------------------------------
- * Photos
+ * Photo slides
  * ------------------------------------------------------------
  */
 
 .photo-stage {
     position: absolute;
     inset: 0;
-
     opacity: 0;
-
-    transition:
-        opacity 2s ease;
-
-    background: #08090b;
+    transition: opacity 1.8s ease;
 }
 
 .photo-stage.active {
     opacity: 1;
 }
 
+.photo-stage .frame {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
 .photo-stage img {
     width: 100%;
     height: 100%;
-
     object-fit: cover;
+
+    transform: scale(1.06);
+    animation: ken-burns 14s ease-out forwards;
 }
 
-/*
- * Subtle cinematic overlay.
- */
+@keyframes ken-burns {
+    from {
+        transform: scale(1.06) translate3d(0, 0, 0);
+    }
+    to {
+        transform: scale(1.14) translate3d(-1%, -1%, 0);
+    }
+}
 
 .photo-stage::after {
     content: "";
-
     position: absolute;
     inset: 0;
-
     background:
         linear-gradient(
             to bottom,
-            rgba(0, 0, 0, 0.05),
-            rgba(0, 0, 0, 0.40)
+            rgba(12, 10, 9, 0.05) 0%,
+            rgba(12, 10, 9, 0.10) 65%,
+            rgba(12, 10, 9, 0.55) 100%
         );
+    pointer-events: none;
+}
+
+.photo-caption {
+    position: absolute;
+    left: 2.4rem;
+    bottom: 1.8rem;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    color: var(--marquee-cream);
+    opacity: 0.55;
+}
+
+.photo-caption .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--marquee-brass);
 }
 
 /*
  * ------------------------------------------------------------
- * Movies
+ * Movie slide — a poster-case in a cinema lobby
  * ------------------------------------------------------------
  */
 
 .movie-stage {
     position: absolute;
     inset: 0;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    padding: 3vw;
-
-    background:
-        radial-gradient(
-            circle at center,
-            #202329 0%,
-            #08090b 70%
-        );
-
     opacity: 0;
-
-    transition:
-        opacity 1.5s ease;
+    transition: opacity 1.4s ease;
+    background: var(--marquee-black);
+    overflow: hidden;
 }
 
 .movie-stage.active {
     opacity: 1;
 }
 
-.movie-title {
-    margin: 0 0 1.5rem;
-
-    font-size:
-        clamp(1.2rem, 2vw, 2rem);
-
-    font-weight: 600;
-
-    letter-spacing: 0.04em;
-
-    text-transform: uppercase;
-
-    opacity: 0.85;
-}
-
-.movies {
-    display: grid;
-
-    grid-template-columns:
-        repeat(10, minmax(0, 1fr));
-
-    gap: 1vw;
-}
-
-.movie {
-    position: relative;
-
-    aspect-ratio: 2 / 3;
-
-    overflow: hidden;
-
-    border-radius: 10px;
-
-    background: #15171b;
-
-    box-shadow:
-        0 12px 30px rgba(0, 0, 0, 0.35);
-
-    transition:
-        transform 0.3s ease,
-        box-shadow 0.3s ease;
-}
-
-.movie:hover {
-    transform:
-        translateY(-6px)
-        scale(1.025);
-
-    box-shadow:
-        0 18px 40px rgba(0, 0, 0, 0.5);
-}
-
-.movie img {
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
-}
-
-.movie-info {
+.movie-backdrop {
     position: absolute;
+    inset: -3%;
+    background-size: cover;
+    background-position: center;
+    filter: blur(28px) saturate(1.1) brightness(0.5);
+    transform: scale(1.05);
+}
 
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    padding:
-        3rem
-        0.65rem
-        0.65rem;
-
+.movie-backdrop::after {
+    content: "";
+    position: absolute;
+    inset: 0;
     background:
         linear-gradient(
-            transparent,
-            rgba(0, 0, 0, 0.9)
+            100deg,
+            rgba(12, 10, 9, 0.92) 0%,
+            rgba(12, 10, 9, 0.75) 38%,
+            rgba(12, 10, 9, 0.35) 68%,
+            rgba(12, 10, 9, 0.55) 100%
         );
 }
 
-.movie-name {
-    font-size:
-        clamp(0.65rem, 0.8vw, 0.9rem);
+.movie-content {
+    position: relative;
+    z-index: 2;
 
-    font-weight: 600;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 3.2vw;
 
-    line-height: 1.2;
+    padding: 0 4vw;
 }
 
-.movie-year {
-    margin-top: 0.25rem;
+.poster-frame {
+    flex: 0 0 auto;
+    width: min(24vw, 320px);
+    aspect-ratio: 2 / 3;
 
-    font-size: 0.7rem;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--marquee-charcoal);
 
-    opacity: 0.65;
+    box-shadow:
+        0 30px 60px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(245, 239, 230, 0.06);
+
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.9s ease 0.15s, transform 0.9s ease 0.15s;
+}
+
+.movie-stage.active .poster-frame {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.poster-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.movie-details {
+    flex: 1 1 auto;
+    max-width: 46ch;
+
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.9s ease 0.3s, transform 0.9s ease 0.3s;
+}
+
+.movie-stage.active .movie-details {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.movie-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--marquee-brass);
+
+    margin-bottom: 1rem;
+}
+
+.movie-eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--marquee-brass);
+}
+
+.movie-title {
+    margin: 0 0 0.9rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(2rem, 3.6vw, 3.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+}
+
+.movie-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.9rem;
+
+    font-size: 0.92rem;
+    color: rgba(245, 239, 230, 0.75);
+    margin-bottom: 1.3rem;
+}
+
+.movie-meta .rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--marquee-brass);
+    font-weight: 600;
+}
+
+.movie-meta .sep {
+    opacity: 0.35;
+}
+
+.movie-genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.4rem;
+}
+
+.movie-genres span {
+    font-size: 0.72rem;
+    letter-spacing: 0.03em;
+    padding: 0.28rem 0.7rem;
+    border: 1px solid rgba(245, 239, 230, 0.25);
+    border-radius: 999px;
+    color: rgba(245, 239, 230, 0.8);
+}
+
+.movie-overview {
+    font-size: clamp(0.95rem, 1.1vw, 1.08rem);
+    line-height: 1.6;
+    color: rgba(245, 239, 230, 0.88);
+
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /*
  * ------------------------------------------------------------
- * Loading
+ * Loading state
  * ------------------------------------------------------------
  */
 
 .message {
     position: absolute;
     inset: 0;
+    z-index: 5;
 
     display: flex;
-
     align-items: center;
     justify-content: center;
 
-    color: #888;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    color: var(--marquee-brass-dim);
 }
 
 .hidden {
@@ -241,27 +332,96 @@ body {
 
 /*
  * ------------------------------------------------------------
+ * Progress rail — quiet indicator of where we are in the loop
+ * ------------------------------------------------------------
+ */
+
+.rail {
+    position: absolute;
+    right: 2.4rem;
+    bottom: 1.8rem;
+    z-index: 3;
+
+    display: flex;
+    gap: 0.4rem;
+}
+
+.rail .tick {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    background: rgba(245, 239, 230, 0.25);
+    overflow: hidden;
+}
+
+.rail .tick.movie {
+    background: rgba(201, 165, 102, 0.35);
+}
+
+.rail .tick.current .fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--marquee-cream);
+    animation: fill-tick linear forwards;
+}
+
+.rail .tick.movie.current .fill {
+    background: var(--marquee-brass);
+}
+
+.rail .tick .fill {
+    display: none;
+}
+
+@keyframes fill-tick {
+    from { width: 0%; }
+    to { width: 100%; }
+}
+
+/*
+ * ------------------------------------------------------------
  * Responsive
  * ------------------------------------------------------------
  */
 
-@media (max-width: 1200px) {
+@media (max-width: 900px) {
+    .movie-content {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+        gap: 1.6rem;
+        padding: 2rem;
+    }
 
-    .movies {
-        grid-template-columns:
-            repeat(5, minmax(0, 1fr));
+    .poster-frame {
+        width: 42vw;
+    }
+
+    .movie-details {
+        max-width: 60ch;
+    }
+
+    .movie-meta,
+    .movie-genres {
+        justify-content: center;
+    }
+
+    .movie-overview {
+        -webkit-line-clamp: 4;
     }
 }
 
-@media (max-width: 700px) {
-
-    .movies {
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr));
+@media (prefers-reduced-motion: reduce) {
+    .photo-stage img {
+        animation: none;
+        transform: scale(1);
     }
 
-    .movie:nth-child(n + 7) {
-        display: none;
+    .poster-frame,
+    .movie-details {
+        transition: opacity 0.6s ease;
+        transform: none;
     }
 }
 
@@ -272,330 +432,325 @@ body {
 
 <div class="wall">
 
-    <div
-        id="photoStage"
-        class="photo-stage"
-    ></div>
-
-    <div
-        id="movieStage"
-        class="movie-stage"
-    >
-
-        <h1 class="movie-title">
-            Latest Movies
-        </h1>
-
-        <div
-            id="movies"
-            class="movies"
-        ></div>
-
+    <div id="photoStage" class="photo-stage">
+        <div class="frame" id="photoFrame"></div>
     </div>
 
-    <div
-        id="message"
-        class="message"
-    >
-        Loading media...
+    <div id="movieStage" class="movie-stage">
+        <div class="movie-backdrop" id="movieBackdrop"></div>
+        <div class="movie-content">
+            <div class="poster-frame">
+                <img id="moviePoster" alt="">
+            </div>
+            <div class="movie-details">
+                <div class="movie-eyebrow" id="movieEyebrow">Now showing</div>
+                <h1 class="movie-title" id="movieTitle"></h1>
+                <div class="movie-meta" id="movieMeta"></div>
+                <div class="movie-genres" id="movieGenres"></div>
+                <p class="movie-overview" id="movieOverview"></p>
+            </div>
+        </div>
     </div>
+
+    <div class="photo-caption hidden" id="photoCaption">
+        <span class="dot"></span>
+        <span id="photoCaptionText">Photo Wall</span>
+    </div>
+
+    <div class="rail hidden" id="rail"></div>
+
+    <div id="message" class="message">Raising the curtain&hellip;</div>
 
 </div>
 
 <script>
 
+/*
+ * ------------------------------------------------------------
+ * State
+ * ------------------------------------------------------------
+ */
+
 let photos = [];
 let movies = [];
 
-let photoIndex = 0;
+let movieIndex = 0;
+let photoPointer = 0;
 
-let mode = "photos";
+let config = {
+    movieEvery: 5,
+    jellyfinEnabled: false,
+    seerrEnabled: false
+};
+
+// The master sequence, e.g. ["photo","photo","photo","photo","movie", ...]
+let sequence = [];
+let sequencePos = -1;
+
+let currentTimer = null;
+
+const PHOTO_DURATION = 8000;
+const MOVIE_DURATION = 14000;
 
 /*
  * ------------------------------------------------------------
- * Photos
+ * Loading
  * ------------------------------------------------------------
  */
+
+async function loadConfig() {
+    try {
+        const response = await fetch("/api/config");
+        config = await response.json();
+    } catch (error) {
+        console.error("Unable to load config, using defaults:", error);
+    }
+}
 
 async function loadPhotos() {
-
     try {
-
-        const response =
-            await fetch("/api/photos");
-
-        const data =
-            await response.json();
-
-        photos =
-            data.photos || [];
-
-        console.log(
-            "Loaded photos:",
-            photos.length
-        );
-
-        if (photos.length > 0) {
-            showPhoto(0);
-        }
-
+        const response = await fetch("/api/photos");
+        const data = await response.json();
+        photos = data.photos || [];
+        console.log("Loaded photos:", photos.length);
     } catch (error) {
-
-        console.error(
-            "Unable to load photos:",
-            error
-        );
+        console.error("Unable to load photos:", error);
     }
 }
-
-/*
- * ------------------------------------------------------------
- * Movies
- * ------------------------------------------------------------
- */
 
 async function loadMovies() {
-
     try {
-
-        const response =
-            await fetch("/api/movies");
-
-        const data =
-            await response.json();
-
-        movies =
-            data.movies || [];
-
-        console.log(
-            "Loaded movies:",
-            movies.length
-        );
-
-        renderMovies();
-
+        const response = await fetch("/api/movies");
+        const data = await response.json();
+        movies = data.movies || [];
+        console.log("Loaded movies:", movies.length);
     } catch (error) {
-
-        console.error(
-            "Unable to load movies:",
-            error
-        );
+        console.error("Unable to load movies:", error);
     }
 }
 
 /*
  * ------------------------------------------------------------
- * Display photo
+ * Sequence building
+ *
+ * Interleave: N photos, then 1 movie, repeating. If one source
+ * is empty, the sequence degrades gracefully to the other.
  * ------------------------------------------------------------
  */
 
-function showPhoto(index) {
+function buildSequence() {
+    sequence = [];
 
-    if (!photos.length) {
+    if (!photos.length && !movies.length) {
         return;
     }
 
-    photoIndex =
-        index % photos.length;
+    if (!movies.length) {
+        sequence = photos.map(() => "photo");
+        return;
+    }
 
-    const stage =
-        document.getElementById(
-            "photoStage"
-        );
+    if (!photos.length) {
+        sequence = movies.map(() => "movie");
+        return;
+    }
 
-    stage.innerHTML = "";
+    let photoCount = 0;
 
-    const image =
-        document.createElement("img");
+    for (let i = 0; i < photos.length; i++) {
+        sequence.push("photo");
+        photoCount++;
 
-    image.src =
-        "/photos/" +
-        photos[photoIndex];
+        if (photoCount >= config.movieEvery) {
+            sequence.push("movie");
+            photoCount = 0;
+        }
+    }
 
-    image.loading = "eager";
-
-    stage.appendChild(image);
+    if (sequence[sequence.length - 1] !== "movie") {
+        sequence.push("movie");
+    }
 }
 
 /*
  * ------------------------------------------------------------
- * Display movies
+ * Rendering: photos
  * ------------------------------------------------------------
  */
 
-function renderMovies() {
+function renderPhoto() {
+    if (!photos.length) return;
 
-    const container =
-        document.getElementById(
-            "movies"
-        );
+    const photo = photos[photoPointer % photos.length];
+    photoPointer++;
 
-    container.innerHTML = "";
+    const frame = document.getElementById("photoFrame");
+    frame.innerHTML = "";
 
-    movies.forEach(movie => {
+    const img = document.createElement("img");
+    img.src = "/photos/" + photo;
+    img.loading = "eager";
+    frame.appendChild(img);
 
-        const card =
-            document.createElement("div");
+    const name = decodeURIComponent(photo.split("/").pop());
+    document.getElementById("photoCaptionText").textContent = name.replace(/\.[^.]+$/, "");
+}
 
-        card.className = "movie";
+/*
+ * ------------------------------------------------------------
+ * Rendering: movie
+ * ------------------------------------------------------------
+ */
 
-        const image =
-            document.createElement("img");
+function renderMovie() {
+    if (!movies.length) return;
 
-        image.src =
-            movie.image;
+    const movie = movies[movieIndex % movies.length];
+    movieIndex++;
 
-        image.alt =
-            movie.name;
+    document.getElementById("movieEyebrow").textContent = movie.status || "Now showing";
+    document.getElementById("movieTitle").textContent = movie.name || "Untitled";
 
-        image.loading =
-            "lazy";
+    const poster = document.getElementById("moviePoster");
+    poster.src = movie.poster || movie.backdrop || "";
+    poster.alt = movie.name || "";
 
-        const info =
-            document.createElement("div");
+    const backdrop = document.getElementById("movieBackdrop");
+    const backdropUrl = movie.backdrop || movie.poster;
+    backdrop.style.backgroundImage = backdropUrl ? `url("${backdropUrl}")` : "none";
 
-        info.className =
-            "movie-info";
+    const metaParts = [];
 
-        const name =
-            document.createElement("div");
+    if (movie.rating) {
+        metaParts.push({ type: "rating", text: "\u2605 " + Number(movie.rating).toFixed(1) });
+    }
+    if (movie.year) metaParts.push({ type: "text", text: movie.year });
+    if (movie.runtime) metaParts.push({ type: "text", text: movie.runtime });
+    if (movie.officialRating) metaParts.push({ type: "text", text: movie.officialRating });
 
-        name.className =
-            "movie-name";
+    const metaEl = document.getElementById("movieMeta");
+    metaEl.innerHTML = "";
 
-        name.textContent =
-            movie.name;
-
-        info.appendChild(name);
-
-        if (movie.year) {
-
-            const year =
-                document.createElement("div");
-
-            year.className =
-                "movie-year";
-
-            year.textContent =
-                movie.year;
-
-            info.appendChild(year);
+    metaParts.forEach((part, idx) => {
+        if (idx > 0) {
+            const sep = document.createElement("span");
+            sep.className = "sep";
+            sep.textContent = "\u2022";
+            metaEl.appendChild(sep);
         }
 
-        card.appendChild(image);
-        card.appendChild(info);
+        const span = document.createElement("span");
+        if (part.type === "rating") span.className = "rating";
+        span.textContent = part.text;
+        metaEl.appendChild(span);
+    });
 
-        container.appendChild(card);
+    const genresEl = document.getElementById("movieGenres");
+    genresEl.innerHTML = "";
 
+    (movie.genres || []).slice(0, 4).forEach(genre => {
+        const span = document.createElement("span");
+        span.textContent = genre;
+        genresEl.appendChild(span);
+    });
+
+    document.getElementById("movieOverview").textContent =
+        movie.overview || "";
+}
+
+/*
+ * ------------------------------------------------------------
+ * Progress rail
+ * ------------------------------------------------------------
+ */
+
+function renderRail() {
+    const rail = document.getElementById("rail");
+
+    if (sequence.length <= 1 || sequence.length > 40) {
+        rail.classList.add("hidden");
+        return;
+    }
+
+    rail.classList.remove("hidden");
+    rail.innerHTML = "";
+
+    sequence.forEach((kind, idx) => {
+        const tick = document.createElement("div");
+        tick.className = "tick " + kind;
+        if (idx === sequencePos) {
+            tick.classList.add("current");
+            const fill = document.createElement("div");
+            fill.className = "fill";
+            fill.style.animationDuration =
+                (kind === "movie" ? MOVIE_DURATION : PHOTO_DURATION) + "ms";
+            tick.appendChild(fill);
+        }
+        rail.appendChild(tick);
     });
 }
 
 /*
  * ------------------------------------------------------------
- * Modes
+ * Slide transitions
  * ------------------------------------------------------------
  */
 
-function showPhotoMode() {
+function showSlide(kind) {
+    const photoStage = document.getElementById("photoStage");
+    const movieStage = document.getElementById("movieStage");
+    const caption = document.getElementById("photoCaption");
 
-    if (!photos.length) {
-
-        if (movies.length) {
-            showMovieMode();
-        }
-
-        return;
+    if (kind === "photo") {
+        renderPhoto();
+        photoStage.classList.add("active");
+        movieStage.classList.remove("active");
+        caption.classList.remove("hidden");
+    } else {
+        renderMovie();
+        movieStage.classList.remove("active");
+        // Force reflow so the entrance transition replays each time.
+        void movieStage.offsetWidth;
+        movieStage.classList.add("active");
+        photoStage.classList.remove("active");
+        caption.classList.add("hidden");
     }
 
-    mode = "photos";
-
-    document
-        .getElementById("photoStage")
-        .classList.add("active");
-
-    document
-        .getElementById("movieStage")
-        .classList.remove("active");
-
-    document
-        .getElementById("message")
-        .classList.add("hidden");
+    document.getElementById("message").classList.add("hidden");
 }
 
-function showMovieMode() {
+function advance() {
+    if (!sequence.length) return;
 
-    if (!movies.length) {
-        return;
-    }
+    sequencePos = (sequencePos + 1) % sequence.length;
+    const kind = sequence[sequencePos];
 
-    mode = "movies";
+    showSlide(kind);
+    renderRail();
 
-    document
-        .getElementById("photoStage")
-        .classList.remove("active");
-
-    document
-        .getElementById("movieStage")
-        .classList.add("active");
-
-    document
-        .getElementById("message")
-        .classList.add("hidden");
+    clearTimeout(currentTimer);
+    currentTimer = setTimeout(
+        advance,
+        kind === "movie" ? MOVIE_DURATION : PHOTO_DURATION
+    );
 }
 
 /*
  * ------------------------------------------------------------
- * Photo rotation
- *
- * One photo every 8 seconds.
+ * Refresh cycles — keep content current without restarting
+ * the running sequence abruptly.
  * ------------------------------------------------------------
  */
 
-setInterval(() => {
+setInterval(async () => {
+    await loadMovies();
+    buildSequence();
+}, 10 * 60 * 1000);
 
-    if (mode !== "photos") {
-        return;
-    }
-
-    photoIndex++;
-
-    showPhoto(photoIndex);
-
-}, 8000);
-
-/*
- * ------------------------------------------------------------
- * Switch between photos and movies.
- *
- * 40 seconds photos
- * 12 seconds movies
- * ------------------------------------------------------------
- */
-
-setInterval(() => {
-
-    if (mode === "photos") {
-
-        showMovieMode();
-
-        setTimeout(
-            showPhotoMode,
-            12000
-        );
-    }
-
-}, 40000);
-
-/*
- * ------------------------------------------------------------
- * Refresh Jellyfin every 10 minutes.
- * ------------------------------------------------------------
- */
-
-setInterval(
-    loadMovies,
-    10 * 60 * 1000
-);
+setInterval(async () => {
+    await loadPhotos();
+    buildSequence();
+}, 30 * 60 * 1000);
 
 /*
  * ------------------------------------------------------------
@@ -603,22 +758,20 @@ setInterval(
  * ------------------------------------------------------------
  */
 
-Promise.all([
-    loadPhotos(),
-    loadMovies()
+(async function start() {
+    await loadConfig();
+    await Promise.all([loadPhotos(), loadMovies()]);
 
-]).then(() => {
+    buildSequence();
 
-    if (photos.length) {
-
-        showPhotoMode();
-
-    } else if (movies.length) {
-
-        showMovieMode();
+    if (!sequence.length) {
+        document.getElementById("message").textContent =
+            "No photos or movies found. Check your Media Wall configuration.";
+        return;
     }
 
-});
+    advance();
+})();
 
 </script>
 

@@ -7,15 +7,35 @@ services:
     container_name: homepage-media-wall
 
     environment:
-      - TZ=Europe/Berlin
-      - JELLYFIN_URL=${JELLYFIN_URL}
-      - JELLYFIN_API_KEY=${JELLYFIN_API_KEY}
-      - PHOTOS_DIR=${PHOTOS_DIR}
+      - TZ=${TZ:-Europe/Berlin}
+
+      # Where photos live inside the container (matches the volume
+      # mount target below). Usually you don't need to change this.
+      - PHOTOS_DIR=${PHOTOS_DIR:-/photos}
+
+      # How many photo slides appear before a movie slide is shown.
+      - MOVIE_EVERY=${MOVIE_EVERY:-5}
+
+      # Which source(s) power the movie slide: "jellyfin", "seerr",
+      # or "both" (interleaved). Leave as "both" if you've set up
+      # both — Media Wall only uses the ones you've configured.
+      - MOVIE_SOURCE=${MOVIE_SOURCE:-both}
+
+      # --- Jellyfin (optional) ---------------------------------
+      # Shows recently added movies from your own server.
+      - JELLYFIN_URL=${JELLYFIN_URL:-}
+      - JELLYFIN_API_KEY=${JELLYFIN_API_KEY:-}
+
+      # --- Jellyseerr / Overseerr (optional) -------------------
+      # Shows recently requested + trending titles. Both projects
+      # share the same API, so either works here unchanged.
+      - SEERR_URL=${SEERR_URL:-}
+      - SEERR_API_KEY=${SEERR_API_KEY:-}
 
     volumes:
-      - ${PHOTOS_HOST_PATH}:${PHOTOS_DIR}:ro
+      - ${PHOTOS_HOST_PATH}:${PHOTOS_DIR:-/photos}:ro
 
     ports:
-      - "${MEDIA_WALL_PORT}:3000"
+      - "${MEDIA_WALL_PORT:-8088}:3000"
 
     restart: unless-stopped
