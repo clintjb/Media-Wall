@@ -547,6 +547,31 @@ app.get("/api/status/portainer", async (req, res) => {
     }
 });
 
+// Plain 200/503 endpoint for Homepage's `siteMonitor`, which only
+// checks the HTTP status code (2xx = up) and doesn't read JSON
+// fields. Returns 200 when every container is healthy/running,
+// 503 otherwise (including when Portainer itself is unreachable).
+app.get("/api/health/portainer", async (req, res) => {
+    try {
+        const status = await getPortainerStatus();
+
+        if (!status.enabled) {
+            // Not configured - report healthy so it doesn't show as
+            // down on a dashboard where this check is optional.
+            return res.status(200).send("Portainer check not configured");
+        }
+
+        if (status.summary === "All healthy") {
+            return res.status(200).send("OK");
+        }
+
+        return res.status(503).send(status.issues || status.summary);
+    } catch (error) {
+        console.error("Portainer health endpoint error:", error);
+        res.status(503).send("Internal error");
+    }
+});
+
 app.get("/api/status/cronjob", async (req, res) => {
     try {
         res.json(await getCronjobStatus());

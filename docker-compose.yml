@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
 
-    container_name: homepage-media-wall
+    container_name: fridge-homepage
 
     environment:
       - TZ=${TZ:-Europe/Berlin}

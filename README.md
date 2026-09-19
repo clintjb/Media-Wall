@@ -118,6 +118,23 @@ many are running, unhealthy/restarting, or stopped.
           label: Issues
 ```
 
+There's also a plain `GET /api/health/portainer` endpoint for Homepage's
+`siteMonitor`, which only checks the HTTP status code rather than reading
+JSON fields. It returns `200` when every container is healthy/running (or
+when Portainer isn't configured, so it doesn't falsely show as down), and
+`503` when something's wrong or Portainer is unreachable:
+
+```yaml
+- Container Health:
+    icon: sh-docker.svg
+    siteMonitor: http://192.168.178.169:8088/api/health/portainer
+    statusStyle: dot
+```
+
+This can be used alongside or instead of the `customapi` card above — the
+`siteMonitor` version just gives you a quick up/down dot, while the
+`customapi` version shows the actual counts and issue details.
+
 ### cron-job.org — last N runs
 
 Checks the most recent executions across every job in your cron-job.org
