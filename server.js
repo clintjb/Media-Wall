@@ -107,18 +107,46 @@ app.use(
  * ------------------------------------------------------------
  */
 
+const JELLYFIN_BASE_URL = JELLYFIN_URL.replace(/\/+$/, "");
+
+function jellyfinHeaders() {
+    return {
+        "Authorization":
+            `MediaBrowser Client="Media Wall", Device="Media Wall", ` +
+            `DeviceId="media-wall", Version="1.0.0", Token="${JELLYFIN_API_KEY}"`,
+        "Accept": "application/json"
+    };
+}
+
 async function jellyfinRequest(endpoint) {
-    const response = await fetch(
-        `${JELLYFIN_URL}${endpoint}`,
-        {
-            headers: {
-                "Authorization": `MediaBrowser Token="${JELLYFIN_API_KEY}"`,
-                "Accept": "application/json"
-            }
-        }
-    );
+    const url = `${JELLYFIN_BASE_URL}${endpoint}`;
+
+    let response;
+
+    try {
+        response = await fetch(url, { headers: jellyfinHeaders() });
+    } catch (error) {
+        // Network-level failure: DNS, connection refused, timeout, etc.
+        console.error(
+            `Jellyfin request failed (network error) for ${url}:`,
+            error.message
+        );
+        throw new Error(`Unable to reach Jellyfin at ${url}: ${error.message}`);
+    }
 
     if (!response.ok) {
+        let body = "";
+
+        try {
+            body = await response.text();
+        } catch (_) {
+            // ignore
+        }
+
+        console.error(
+            `Jellyfin returned ${response.status} for ${url}. Body: ${body.slice(0, 500)}`
+        );
+
         throw new Error(
             `Jellyfin returned ${response.status}`
         );
@@ -172,15 +200,16 @@ app.get("/api/movies", async (req, res) => {
 app.get("/jellyfin-image/:id", async (req, res) => {
     try {
         const response = await fetch(
-            `${JELLYFIN_URL}/Items/${req.params.id}/Images/Primary`,
+            `${JELLYFIN_BASE_URL}/Items/${req.params.id}/Images/Primary`,
             {
-                headers: {
-                    "Authorization": `MediaBrowser Token="${JELLYFIN_API_KEY}"`
-                }
+                headers: jellyfinHeaders()
             }
         );
 
         if (!response.ok) {
+            console.error(
+                `Jellyfin image fetch for ${req.params.id} returned ${response.status}`
+            );
             return res.sendStatus(response.status);
         }
 
@@ -211,5 +240,8 @@ app.get("/jellyfin-image/:id", async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
     console.log(
         `Media Wall listening on port ${PORT}`
+    );
+    console.log(
+        `Using Jellyfin base URL: ${JELLYFIN_BASE_URL}`
     );
 });
